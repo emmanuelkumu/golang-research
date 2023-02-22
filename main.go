@@ -10,11 +10,16 @@ type RequestData struct {
 	Method string `json:"method"`
 }
 
+type RequestParam struct {
+	Field string `json:"field"`
+	Value string `json:"value"`
+}
+
 type Request struct {
-	Template RequestData `json:"template"`
-	Users    RequestData `json:"users"`
-	Callback RequestData `json:"callback"`
-	Params   string      `json:"params"`
+	Template RequestData    `json:"template"`
+	Users    RequestData    `json:"users"`
+	Callback RequestData    `json:"callback"`
+	Params   []RequestParam `json:"params"`
 }
 
 func main() {
@@ -32,7 +37,16 @@ func main() {
 			"uri": "https://x5i7-qk19-xc7o.s2.xano.io/api:push-notification/callback/like",
 			"method":"POST"
 		},
-		"params": "[{\"from\" : 110325 },{\"to\" : 110326 }]"
+		"params": [
+			{
+				"field":"from",
+				"value":"110325"
+			},
+			{
+				"field":"to",
+				"value":"110326"
+			}
+		]
 	}`)
 	var r Request
 	err := json.Unmarshal(jsonParam, &r)
@@ -42,5 +56,5 @@ func main() {
 	fmt.Println("Template URI: ", r.Template.Uri)
 	fmt.Println("Users URI: ", r.Users.Uri)
 	fmt.Println("Callback URI: ", r.Callback.Uri)
-	fmt.Println("Parameters: ", r.Params)
+	fmt.Println("Parameters: ", r.Params[len(r.Params)-1].Field)
 }
