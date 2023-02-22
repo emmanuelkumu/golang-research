@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+
+	firebase "firebase.google.com/go"
+	"google.golang.org/api/option"
 )
 
 type RequestData struct {
@@ -53,8 +58,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Template URI: ", r.Template.Uri)
-	fmt.Println("Users URI: ", r.Users.Uri)
-	fmt.Println("Callback URI: ", r.Callback.Uri)
-	fmt.Println("Parameters: ", r.Params[len(r.Params)-1].Field)
+	// fmt.Println("Template URI: ", r.Template.Uri)
+	// fmt.Println("Users URI: ", r.Users.Uri)
+	// fmt.Println("Callback URI: ", r.Callback.Uri)
+	// fmt.Println("Parameters: ", r.Params[len(r.Params)-1].Field)
+
+	opt := option.WithCredentialsFile("creds/penlab-duplicate-firebase-adminsdk-f1owv-19116da36d.json")
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	client, err := app.Firestore(context.Background())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	client.Close()
 }
