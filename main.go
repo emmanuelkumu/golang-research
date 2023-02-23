@@ -7,6 +7,7 @@ import (
 	"log"
 
 	firebase "firebase.google.com/go"
+	"firebase.google.com/go/messaging"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
@@ -79,7 +80,9 @@ func main() {
 
 	// Querying FCM Tokens
 	fmt.Println("Get FCM Tokens:")
-	iter := client.Collection("users").Where("uid", "in", []string{"009hsLVWvGhE8VHQYfW0GteOugt1", "0K0DRcLOb1QYJAleec982yKN4pj2"}).Documents(ctx)
+	iter := client.Collection("users").Where("uid", "in", []string{"0K0DRcLOb1QYJAleec982yKN4pj2"}).Documents(ctx)
+
+	var tokens []string
 
 	//Iterating FCM Tokens
 	for {
@@ -99,7 +102,7 @@ func main() {
 			if fcm_err != nil {
 				log.Fatalln(fcm_err)
 			}
-			fmt.Println(fcm_token.Data())
+			tokens = append(tokens, fcm_token.Data()["fcm_token"].(string))
 		}
 	}
 
@@ -107,4 +110,24 @@ func main() {
 		log.Fatalln(err)
 	}
 	client.Close()
+
+	//Initializing FCM clients
+	fcm_client, err := app.Messaging(ctx)
+	if err != nil {
+		log.Fatalf("error getting Messaging client: %v\n", err)
+	}
+	// Send Messages
+	message := &messaging.MulticastMessage{
+		Notification: &messaging.Notification{
+			Title: "Sample",
+			Body:  "Content of the sample",
+		},
+		Tokens: tokens,
+	}
+
+	br, err := fcm_client.SendMulticast(context.Background(), message)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("%d messages were sent successfully\n", br.SuccessCount)
 }
